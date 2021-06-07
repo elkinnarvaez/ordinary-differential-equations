@@ -1,1 +1,1 @@
-# ordinary-differential-equations
+# Ordinary Differential Equations
