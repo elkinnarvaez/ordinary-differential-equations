@@ -3,15 +3,15 @@ import sympy as sym
 import numpy as np
 import matplotlib.pyplot as ptl
 import time
-from ode import eulers_method, taylor_series_method
+from ode import eulers_method, taylor_series_method, runge_kutta_2_method, runge_kutta_4_method, two_steps_method, adams_bashforth
 from utils import eval_func
 
 def main():
     t = sym.Symbol('t')
     y = sym.Function('y')(t)
     dydt = y.diff(t)
-    eq1, eq1_ = sym.Eq(dydt, -2*t*(y**2)), -2*t*(sym.Symbol('y')**2)
-    eq2, eq2_ = sym.Eq(dydt, y), sym.Symbol('y')
+    eq1, eq1_ = sym.Eq(dydt, y), sym.Symbol('y')
+    eq2, eq2_ = sym.Eq(dydt, -2*t*(y**2)), -2*t*(sym.Symbol('y')**2)
     eqs = [(eq1, eq1_), (eq2, eq2_)]
     i = 1
     for eq in eqs:
@@ -31,9 +31,9 @@ def main():
     # Numerical calculation
     t0 = 0
     y0 = 1
-    n = 3
-    h = 0.5
-    y_approx = eulers_method(eq_, t0, y0, h, n)
+    n = 3 # Number of steps
+    h = 0.005
+    y_approx = adams_bashforth(eq_, t0, y0, h, n)
 
     # Analytical calculation
     t_ans = [None for _ in range(n + 1)]
@@ -44,7 +44,6 @@ def main():
         t_ans[k] = tk
         tk += h
         k += 1
-
     eq_C1 = sym.Eq(y0, sym.dsolve(eq).rhs.subs(sym.Symbol('t'), t0))
     C1 = sym.solvers.solve(eq_C1, sym.Symbol('C1'))[0]
     f_analytic = sym.dsolve(eq).rhs.subs(sym.Symbol('C1'), C1)
