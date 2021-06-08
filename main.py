@@ -3,7 +3,7 @@ import sympy as sym
 import numpy as np
 import matplotlib.pyplot as ptl
 import time
-from ode import euler_method
+from ode import eulers_method, taylor_series_method
 from utils import eval_func
 
 def main():
@@ -29,13 +29,22 @@ def main():
     eq_ = eqs[option][1]
 
     # Numerical calculation
-    t0 = 1
+    t0 = 0
     y0 = 1
     n = 3
     h = 0.5
-    t_ans, y_approx = euler_method(eq_, t0, y0, h, n)
+    y_approx = eulers_method(eq_, t0, y0, h, n)
 
     # Analytical calculation
+    t_ans = [None for _ in range(n + 1)]
+    t_ans[0] = t0
+    tk = t0 + h
+    k = 1
+    while(k <= n):
+        t_ans[k] = tk
+        tk += h
+        k += 1
+
     eq_C1 = sym.Eq(y0, sym.dsolve(eq).rhs.subs(sym.Symbol('t'), t0))
     C1 = sym.solvers.solve(eq_C1, sym.Symbol('C1'))[0]
     f_analytic = sym.dsolve(eq).rhs.subs(sym.Symbol('C1'), C1)
