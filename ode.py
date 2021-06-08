@@ -106,3 +106,24 @@ def adams_bashforth(f, t0, y0, h, n):
         k += 1
         tk += h
     return y
+
+def higher_order_method(f, initial_values, h, n, order):
+    t = [None for _ in range(n + 1)]
+    t[0] = initial_values[0][0]
+    for i in range(1, n + 1):
+        t[i] = t[i - 1] + h
+    t0 = initial_values[0][0]
+    y0 = initial_values[0][1]
+    y_prev = runge_kutta_4_method(f, t0, y0, h, n)
+    y_curr = [None for _ in range(n + 1)]
+    for i in range(1, order):
+        t0 = initial_values[i][0]
+        y0 = initial_values[i][1]
+        y_curr[0] = y0
+        k = 1
+        while(k <= n):
+            yk = float(y_curr[k - 1] + y_prev[k - 1]*h)
+            y_curr[k] = yk
+            k += 1
+        y_prev = y_curr.copy()
+    return y_curr
