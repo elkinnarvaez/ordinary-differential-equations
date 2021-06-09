@@ -37,13 +37,13 @@ def main():
     eq = eqs[option][0]
     eq_ = eqs[option][1]
 
-    print("1. PVI for first order ODEs")
-    print("2. PVI for higher order ODEs")
-    print("3. PVF (for 2-order ODEs)")
+    print("1. IVP for first order ODEs")
+    print("2. IVP for higher order ODEs")
+    print("3. FVP (for 2-order ODEs)")
     good = False
     option = None
     while(not good):
-        option = int(input("Please choose the kind of ODE you are working with: "))
+        option = int(input("Please choose the kind of problem you want to solve: "))
         if(option < 1 or option > 3):
             print("Invalid option. Please try again")
         else:
@@ -107,14 +107,14 @@ def main():
         # Numerical calculation
         initial_values = [None for _ in range(order)]
         for i in range(order):
-            initial_values[i] = (0, random.randint(1, 6))
+            initial_values[i] = (0, random.randint(1, 6)) # The t value must be the same for all the equations
         print("Initial values:", initial_values)
         n = 3 # Number of steps after the initial value
         h = 0.0005
         start = time.time()
         y_approx = higher_order_method(eq_, initial_values, h, n, order)
         end = time.time()
-        elpased = end - start
+        elapsed = end - start
 
         # Analytical calculation
         t = [None for _ in range(n + 1)]
