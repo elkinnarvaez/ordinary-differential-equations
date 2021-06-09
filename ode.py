@@ -163,7 +163,6 @@ def finite_element_method(f, t0, tn, y0, yn, n):
     t = list(np.linspace(t0, tn, num = n))
     A = np.array([[0 for _ in range(n)] for _ in range(n)], dtype = 'float')
     b = np.array([[0] for _ in range(n)], dtype = 'float')
-
     for i in range(n):
         A[0][i] = t[0]**i
     b[0][0] = y0

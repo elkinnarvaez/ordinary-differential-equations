@@ -2,7 +2,7 @@ from inspect import FullArgSpec
 from sys import stdin
 import sympy as sym
 import numpy as np
-import matplotlib.pyplot as ptl
+import matplotlib.pyplot as plt
 import time
 import random
 from sympy.core.numbers import E
@@ -48,6 +48,7 @@ def main():
             print("Invalid option. Please try again")
         else:
             good = True
+    t = None
     y_approx = None
     y_analytic = None
     elapsed = None
@@ -55,8 +56,8 @@ def main():
         # Numerical calculation
         t0 = 0
         y0 = 1
-        n = 3 # Number of steps after the initial value
-        h = 0.005
+        n = 50 # Number of steps after the initial value
+        h = 0.5
         print("1. Euler's method")
         print("2. Taylor series method")
         print("3. Runge-Kutta order 2 method")
@@ -86,7 +87,7 @@ def main():
         elif(option == 6):
             y_approx = adams_bashforth(eq_, t0, y0, h, n)
         end = time.time()
-        elpased = end - start
+        elapsed = end - start
 
         # Analytical calculation
         t = [None for _ in range(n + 1)]
@@ -110,7 +111,7 @@ def main():
             initial_values[i] = (0, random.randint(1, 6)) # The t value must be the same for all the equations
         print("Initial values:", initial_values)
         n = 3 # Number of steps after the initial value
-        h = 0.0005
+        h = 0.5
         start = time.time()
         y_approx = higher_order_method(eq_, initial_values, h, n, order)
         end = time.time()
@@ -175,6 +176,23 @@ def main():
     print(f"Mean error: {mean_error}")
     print(f"Error std: {error_std}")
     print(f"Time: {elapsed} sec")
+    # Plotting
+    fig1, ax1 = plt.subplots()
+    ax1.plot(t, y_approx, label="Approximate solution")
+    ax1.plot(t, y_analytic, label="Analytic solution")
+    ax1.legend()
+    ax1.set_xlabel("t")
+    ax1.set_ylabel("y(t)")
+    scalar_offset = 0 # 1.3
+    x0_1, xmax_1 = plt.xlim()
+    y0_1, ymax_1 = plt.ylim()
+    text_x_pos_1 = 1.49
+    text_y_pos_1 = y0_1 + (ymax_1 - y0_1) + scalar_offset
+    ax1.text(text_x_pos_1, text_y_pos_1, "Mean error: {:e} \nStandard deviation: {:e} \nRunning time: {:e} sec".format(mean_error, error_std, elapsed), bbox=dict(boxstyle="round",
+                ec=(1., 0.5, 0.5),
+                fc=(1., 0.9, 0.8),
+                ))
+    plt.show()
     return 0
 
 if __name__ == '__main__':
