@@ -7,7 +7,7 @@ import time
 import random
 from sympy.core.numbers import E
 from sympy.polys.numberfields import to_number_field
-from ode import eulers_method, taylor_series_method, runge_kutta_2_method, runge_kutta_4_method, two_steps_method, adams_bashforth, higher_order_method, finite_difference_method
+from ode import eulers_method, taylor_series_method, runge_kutta_2_method, runge_kutta_4_method, two_steps_method, adams_bashforth, higher_order_method, finite_difference_method, finite_element_method
 from utils import eval_func
 
 def main():
@@ -39,7 +39,7 @@ def main():
 
     print("1. PVI for first order ODEs")
     print("2. PVI for higher order ODEs")
-    print("3. PVF (only for higher order ODEs)")
+    print("3. PVF (for 2-order ODEs)")
     good = False
     option = None
     while(not good):
@@ -48,6 +48,8 @@ def main():
             print("Invalid option. Please try again")
         else:
             good = True
+    y_approx = None
+    y_analytic = None
     if(option == 1):
         # Numerical calculation
         t0 = 0
@@ -95,9 +97,6 @@ def main():
         C1 = sym.solvers.solve(eq_C1, sym.Symbol('C1'))[0]
         y = sym.dsolve(eq).rhs.subs(sym.Symbol('C1'), C1)
         y_analytic = eval_func(y, t)
-
-        print(y_approx)
-        print(y_analytic)
     elif(option == 2):
         order = int(input("Please type the order of the ODE: "))
 
@@ -129,17 +128,27 @@ def main():
             if(i == order - 1):
                 y = eq.rhs
         y_analytic = eval_func(y, t)
-        print(y_approx)
-        print(y_analytic)
     elif(option == 3):
-        order = int(input("Please type the order of the ODE: "))
-
+        order = 2
         # Numerical calculation
         t0, y0 = 0, 0
         tn, yn = 1, 1
         n = 5
-        y_approx = finite_difference_method(eq_, t0, tn, y0, yn, n)
-    
+        print("1. Finite difference method")
+        print("2. Finite element method")
+        good = False
+        option = None
+        while(not good):
+            option = int(input("Please choose the method you want to work with: "))
+            if(option < 1 or option > 2):
+                print("Invalid option. Please try again")
+            else:
+                good = True
+        y_approx = None
+        if(option == 1):
+            y_approx = finite_difference_method(eq_, t0, tn, y0, yn, n)
+        elif(option == 2):
+            y_approx = finite_element_method(eq_, t0, tn, y0, yn, n)
         # Analytical calculation
         t = list(np.linspace(t0, tn, num = n))
         y = None
@@ -150,8 +159,8 @@ def main():
             if(i == order - 1):
                 y = eq.rhs
         y_analytic = eval_func(y, t)
-        print(y_approx)
-        print(y_analytic)
+    print(y_analytic)
+    print(y_approx)
     return 0
 
 if __name__ == '__main__':

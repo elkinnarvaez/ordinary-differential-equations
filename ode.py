@@ -1,6 +1,6 @@
 import sympy as sym
 import numpy as np
-
+from utils import build_polynomial_matrix, evaluate_polynomial
 def eulers_method(f, t0, y0, h, n):
     t = [None for _ in range(n + 1)]
     y = [None for _ in range(n + 1)]
@@ -115,7 +115,7 @@ def higher_order_method(f, initial_values, h, n, order):
         t[i] = t[i - 1] + h
     t0 = initial_values[0][0]
     y0 = initial_values[0][1]
-    y_prev = runge_kutta_4_method(f, t0, y0, h, n)
+    y_prev = eulers_method(f, t0, y0, h, n)
     y_curr = [None for _ in range(n + 1)]
     for i in range(1, order):
         t0 = initial_values[i][0]
@@ -123,7 +123,7 @@ def higher_order_method(f, initial_values, h, n, order):
         y_curr[0] = y0
         k = 1
         while(k <= n):
-            yk = float(y_curr[k - 1] + y_prev[k - 1]*h)
+            yk = float(y_curr[k - 1] + y_prev[k - 1]*h) # Euler's method
             y_curr[k] = yk
             k += 1
         y_prev = y_curr.copy()
@@ -157,4 +157,27 @@ def finite_difference_method(f, t0, tn, y0, yn, n):
     x = np.linalg.solve(A, b)
     for i in range(1, n - 1):
         y[i] = float(x[i - 1][0])
+    return y
+
+def finite_element_method(f, t0, tn, y0, yn, n):
+    t = list(np.linspace(t0, tn, num = n))
+    A = np.array([[0 for _ in range(n)] for _ in range(n)], dtype = 'float')
+    b = np.array([[0] for _ in range(n)], dtype = 'float')
+
+    for i in range(n):
+        A[0][i] = t[0]**i
+    b[0][0] = y0
+    for i in range(n):
+        A[n - 1][i] = t[n - 1]**i
+    b[n - 1][0] = yn
+    for i in range(1, n - 1):
+        A[i][0] = 0
+        A[i][1] = 0
+        for j in range(n - 2):
+            coeff = (j + 2)*(j + 1)
+            A[i][j + 2] = coeff*(t[i]**j)
+        b[i][0] = float(f.subs(sym.Symbol('t'), t[i]).evalf())
+    x = np.linalg.solve(A, b)
+    # Polynomial evaluation
+    y = list(evaluate_polynomial(t, x).T[0])
     return y
