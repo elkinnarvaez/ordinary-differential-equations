@@ -4,7 +4,7 @@ import sympy as sym
 import numpy as np
 import matplotlib.pyplot as ptl
 import time
-
+import random
 from sympy.core.numbers import E
 from ode import eulers_method, taylor_series_method, runge_kutta_2_method, runge_kutta_4_method, two_steps_method, adams_bashforth, higher_order_method
 from utils import eval_func
@@ -12,20 +12,17 @@ from utils import eval_func
 def main():
     t = sym.Symbol('t')
     y = sym.Function('y')(t)
-    x = sym.Function('x')(t)
     dydt = y.diff(t)
-    dy2dt2 = y.diff(t).diff(t)
-    dxdt = x.diff(t)
     eq1, eq1_ = sym.Eq(dydt, y), sym.Symbol('y')
     eq2, eq2_ = sym.Eq(dydt, -2*t*(y**2)), -2*t*(sym.Symbol('y')**2)
     eq3, eq3_ = sym.Eq(dydt, 2*t), 2*t
     eq4, eq4_ = sym.Eq(dydt, 1 + t**2), 1 + t**2
     eq5, eq5_ = sym.Eq(dydt, 1 + (t**3)/3 + t), 1 + (t**3)/3 + t
-    eq6, eq6_ = sym.Eq(dydt, 2*t + y), 2*t
+    eq6, eq6_ = sym.Eq(dydt, 2*t), 2*t
     eqs = [(eq1, eq1_), (eq2, eq2_), (eq3, eq3_), (eq4, eq4_), (eq5, eq5_), (eq6, eq6_)]
     i = 1
     for eq in eqs:
-        print(f"{i}. {eq[0]}")
+        print(f"{i}. {eq[0].lhs} = {eq[0].rhs}")
         i += 1
     good = False
     option = None
@@ -43,7 +40,7 @@ def main():
     good = False
     option = None
     while(not good):
-        option = int(input("Please choose the kind of equation you are working with: "))
+        option = int(input("Please choose the kind of ODE you are working with: "))
         if(option < 1 or option > 2):
             print("Invalid option. Please try again")
         else:
@@ -52,9 +49,35 @@ def main():
         # Numerical calculation
         t0 = 0
         y0 = 1
-        n = 3 # Number of steps
+        n = 3 # Number of steps after the initial value
         h = 0.005
-        y_approx = adams_bashforth(eq_, t0, y0, h, n)
+        print("1. Euler's method")
+        print("2. Taylor series method")
+        print("3. Runge-Kutta order 2 method")
+        print("4. Runge-Kutta order 4 method")
+        print("5. Two steps method")
+        print("6. Adams Bashforth method")
+        good = False
+        option = None
+        while(not good):
+            option = int(input("Please choose the method you want to work with: "))
+            if(option < 1 or option > 6):
+                print("Invalid option. Please try again")
+            else:
+                good = True
+        y_approx = None
+        if(option == 1):
+            y_approx = eulers_method(eq_, t0, y0, h, n)
+        elif(option == 2):
+            y_approx = taylor_series_method(eq_, t0, y0, h, n)
+        elif(option == 3):
+            y_approx = runge_kutta_2_method(eq_, t0, y0, h, n)
+        elif(option == 4):
+            y_approx = runge_kutta_4_method(eq_, t0, y0, h, n)
+        elif(option == 5):
+            y_approx = two_steps_method(eq_, t0, y0, h, n)
+        elif(option == 6):
+            y_approx = adams_bashforth(eq_, t0, y0, h, n)
 
         # Analytical calculation
         t = [None for _ in range(n + 1)]
@@ -74,10 +97,14 @@ def main():
         print(y_approx)
         print(y_analytic)
     else:
-        order = 4
+        order = int(input("Please type the order of the ODE: "))
+
         # Numerical calculation
-        initial_values = [(0, 2), (0, 1), (0, 3), (0, 6)]
-        n = 10 # Number of steps
+        initial_values = [None for _ in range(order)]
+        for i in range(order):
+            initial_values[i] = (0, random.randint(1, 6))
+        print("Initial values:", initial_values)
+        n = 3 # Number of steps after the initial value
         h = 0.0005
         y_approx = higher_order_method(eq_, initial_values, h, n, order)
 
@@ -100,7 +127,6 @@ def main():
             if(i == order - 1):
                 y = eq.rhs
         y_analytic = eval_func(y, t)
-        print(t)
         print(y_approx)
         print(y_analytic)
         
