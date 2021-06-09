@@ -8,7 +8,7 @@ import random
 from sympy.core.numbers import E
 from sympy.polys.numberfields import to_number_field
 from ode import eulers_method, taylor_series_method, runge_kutta_2_method, runge_kutta_4_method, two_steps_method, adams_bashforth, higher_order_method, finite_difference_method, finite_element_method
-from utils import eval_func
+from utils import eval_func, abs_error
 
 def main():
     t = sym.Symbol('t')
@@ -50,6 +50,7 @@ def main():
             good = True
     y_approx = None
     y_analytic = None
+    elapsed = None
     if(option == 1):
         # Numerical calculation
         t0 = 0
@@ -71,6 +72,7 @@ def main():
             else:
                 good = True
         y_approx = None
+        start = time.time()
         if(option == 1):
             y_approx = eulers_method(eq_, t0, y0, h, n)
         elif(option == 2):
@@ -83,6 +85,8 @@ def main():
             y_approx = two_steps_method(eq_, t0, y0, h, n)
         elif(option == 6):
             y_approx = adams_bashforth(eq_, t0, y0, h, n)
+        end = time.time()
+        elpased = end - start
 
         # Analytical calculation
         t = [None for _ in range(n + 1)]
@@ -107,7 +111,10 @@ def main():
         print("Initial values:", initial_values)
         n = 3 # Number of steps after the initial value
         h = 0.0005
+        start = time.time()
         y_approx = higher_order_method(eq_, initial_values, h, n, order)
+        end = time.time()
+        elpased = end - start
 
         # Analytical calculation
         t = [None for _ in range(n + 1)]
@@ -145,10 +152,13 @@ def main():
             else:
                 good = True
         y_approx = None
+        start = time.time()
         if(option == 1):
             y_approx = finite_difference_method(eq_, t0, tn, y0, yn, n)
         elif(option == 2):
             y_approx = finite_element_method(eq_, t0, tn, y0, yn, n)
+        end = time.time()
+        elapsed = end - start
         # Analytical calculation
         t = list(np.linspace(t0, tn, num = n))
         y = None
@@ -159,8 +169,12 @@ def main():
             if(i == order - 1):
                 y = eq.rhs
         y_analytic = eval_func(y, t)
-    print(y_analytic)
-    print(y_approx)
+    error = abs_error(y_approx, y_analytic)
+    mean_error = np.mean(error)
+    error_std = np.std(error)
+    print(f"Mean error: {mean_error}")
+    print(f"Error std: {error_std}")
+    print(f"Time: {elapsed} sec")
     return 0
 
 if __name__ == '__main__':
