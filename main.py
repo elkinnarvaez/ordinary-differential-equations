@@ -4,6 +4,7 @@ import sympy as sym
 import numpy as np
 import matplotlib.pyplot as plt
 import time
+import math
 import random
 from sympy.core.numbers import E
 from sympy.polys.numberfields import to_number_field
@@ -52,12 +53,13 @@ def main():
     y_approx = None
     y_analytic = None
     elapsed = None
+    tmax = 20 # A value greater than 0
+    h = 0.05
     if(option == 1):
         # Numerical calculation
         t0 = 0
         y0 = 1
-        n = 50 # Number of steps after the initial value
-        h = 0.5
+        n = int(math.ceil(tmax/h)) # Number of steps after the initial value
         print("1. Euler's method")
         print("2. Taylor series method")
         print("3. Runge-Kutta order 2 method")
@@ -110,8 +112,7 @@ def main():
         for i in range(order):
             initial_values[i] = (0, random.randint(1, 6)) # The t value must be the same for all the equations
         print("Initial values:", initial_values)
-        n = 3 # Number of steps after the initial value
-        h = 0.5
+        n = int(math.ceil(tmax/h)) # Number of steps after the initial value
         start = time.time()
         y_approx = higher_order_method(eq_, initial_values, h, n, order)
         end = time.time()
@@ -186,7 +187,7 @@ def main():
     scalar_offset = 0 # 1.3
     x0_1, xmax_1 = plt.xlim()
     y0_1, ymax_1 = plt.ylim()
-    text_x_pos_1 = 1.49
+    text_x_pos_1 = 1
     text_y_pos_1 = y0_1 + (ymax_1 - y0_1) + scalar_offset
     ax1.text(text_x_pos_1, text_y_pos_1, "Mean error: {:e} \nStandard deviation: {:e} \nRunning time: {:e} sec".format(mean_error, error_std, elapsed), bbox=dict(boxstyle="round",
                 ec=(1., 0.5, 0.5),
