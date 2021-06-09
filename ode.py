@@ -1,4 +1,5 @@
 import sympy as sym
+import numpy as np
 
 def eulers_method(f, t0, y0, h, n):
     t = [None for _ in range(n + 1)]
@@ -127,3 +128,33 @@ def higher_order_method(f, initial_values, h, n, order):
             k += 1
         y_prev = y_curr.copy()
     return y_curr
+
+def finite_difference_method(f, t0, tn, y0, yn, n):
+    h = (tn - t0)/(n - 1)
+    t = list(np.linspace(t0, tn, num = n))
+    y = [None for _ in range(n)]
+    y[0] = y0
+    y[n - 1] = yn
+    for i in range(1, n - 1):
+        y[i] = sym.Symbol(f'y{i}')
+    A = np.array([[0 for _ in range(n - 2)] for _ in range(n - 2)], dtype = 'float')
+    b = np.array([[0] for _ in range(n - 2)], dtype = 'float')
+    for i in range(1, n - 1):
+        ti = t[i]
+        if(i == n - 2):
+            A[i - 1][(i - 1) - 1] = 1
+            A[i - 1][i - 1] = -2
+            b[i - 1][0] = float(f.subs(sym.Symbol('t'), ti).evalf())*(h**2) - y[i + 1]
+        elif(i == 1):
+            A[i - 1][i - 1] = -2
+            A[i - 1][(i + 1) - 1] = 1
+            b[i - 1][0] = float(f.subs(sym.Symbol('t'), ti).evalf())*(h**2) - y[i - 1]
+        else:
+            A[i - 1][(i - 1) - 1] = 1
+            A[i - 1][i - 1] = -2
+            A[i - 1][(i + 1) - 1] = 1
+            b[i - 1][0] = float(f.subs(sym.Symbol('t'), ti).evalf())*(h**2)
+    x = np.linalg.solve(A, b)
+    for i in range(1, n - 1):
+        y[i] = float(x[i - 1][0])
+    return y

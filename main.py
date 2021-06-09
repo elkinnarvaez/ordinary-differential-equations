@@ -6,7 +6,8 @@ import matplotlib.pyplot as ptl
 import time
 import random
 from sympy.core.numbers import E
-from ode import eulers_method, taylor_series_method, runge_kutta_2_method, runge_kutta_4_method, two_steps_method, adams_bashforth, higher_order_method
+from sympy.polys.numberfields import to_number_field
+from ode import eulers_method, taylor_series_method, runge_kutta_2_method, runge_kutta_4_method, two_steps_method, adams_bashforth, higher_order_method, finite_difference_method
 from utils import eval_func
 
 def main():
@@ -19,7 +20,8 @@ def main():
     eq4, eq4_ = sym.Eq(dydt, 1 + t**2), 1 + t**2
     eq5, eq5_ = sym.Eq(dydt, 1 + (t**3)/3 + t), 1 + (t**3)/3 + t
     eq6, eq6_ = sym.Eq(dydt, 2*t), 2*t
-    eqs = [(eq1, eq1_), (eq2, eq2_), (eq3, eq3_), (eq4, eq4_), (eq5, eq5_), (eq6, eq6_)]
+    eq7, eq7_ = sym.Eq(dydt, 6*t), 6*t
+    eqs = [(eq1, eq1_), (eq2, eq2_), (eq3, eq3_), (eq4, eq4_), (eq5, eq5_), (eq6, eq6_), (eq7, eq7_)]
     i = 1
     for eq in eqs:
         print(f"{i}. {eq[0].lhs} = {eq[0].rhs}")
@@ -35,13 +37,14 @@ def main():
     eq = eqs[option][0]
     eq_ = eqs[option][1]
 
-    print("1. PVI for first order ODE")
-    print("2. PVI for higher order ODE")
+    print("1. PVI for first order ODEs")
+    print("2. PVI for higher order ODEs")
+    print("3. PVF (only for higher order ODEs)")
     good = False
     option = None
     while(not good):
         option = int(input("Please choose the kind of ODE you are working with: "))
-        if(option < 1 or option > 2):
+        if(option < 1 or option > 3):
             print("Invalid option. Please try again")
         else:
             good = True
@@ -93,10 +96,9 @@ def main():
         y = sym.dsolve(eq).rhs.subs(sym.Symbol('C1'), C1)
         y_analytic = eval_func(y, t)
 
-        print(t)
         print(y_approx)
         print(y_analytic)
-    else:
+    elif(option == 2):
         order = int(input("Please type the order of the ODE: "))
 
         # Numerical calculation
@@ -129,8 +131,27 @@ def main():
         y_analytic = eval_func(y, t)
         print(y_approx)
         print(y_analytic)
-        
+    elif(option == 3):
+        order = int(input("Please type the order of the ODE: "))
+
+        # Numerical calculation
+        t0, y0 = 0, 0
+        tn, yn = 1, 1
+        n = 5
+        y_approx = finite_difference_method(eq_, t0, tn, y0, yn, n)
     
+        # Analytical calculation
+        t = list(np.linspace(t0, tn, num = n))
+        y = None
+        for i in range(order):
+            eq_C = sym.Eq(y0, sym.dsolve(eq).rhs.subs(sym.Symbol('t'), t0))
+            C = sym.solvers.solve(eq_C, sym.Symbol('C1'))[0]
+            eq = sym.Eq(dydt, sym.dsolve(eq).rhs.subs(sym.Symbol('C1'), C))
+            if(i == order - 1):
+                y = eq.rhs
+        y_analytic = eval_func(y, t)
+        print(y_approx)
+        print(y_analytic)
     return 0
 
 if __name__ == '__main__':
