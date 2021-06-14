@@ -1,6 +1,7 @@
 import sympy as sym
 import numpy as np
 from utils import build_polynomial_matrix, evaluate_polynomial
+
 def eulers_method(f, t0, y0, h, n):
     t = [None for _ in range(n + 1)]
     y = [None for _ in range(n + 1)]

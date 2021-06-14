@@ -15,14 +15,12 @@ def main():
     t = sym.Symbol('t')
     y = sym.Function('y')(t)
     dydt = y.diff(t)
-    eq1, eq1_ = sym.Eq(dydt, y), sym.Symbol('y')
-    eq2, eq2_ = sym.Eq(dydt, -2*t*(y**2)), -2*t*(sym.Symbol('y')**2)
-    eq3, eq3_ = sym.Eq(dydt, 2*t), 2*t
-    eq4, eq4_ = sym.Eq(dydt, 1 + t**2), 1 + t**2
-    eq5, eq5_ = sym.Eq(dydt, 1 + (t**3)/3 + t), 1 + (t**3)/3 + t
-    eq6, eq6_ = sym.Eq(dydt, 2*t), 2*t
-    eq7, eq7_ = sym.Eq(dydt, 6*t), 6*t
-    eqs = [(eq1, eq1_), (eq2, eq2_), (eq3, eq3_), (eq4, eq4_), (eq5, eq5_), (eq6, eq6_), (eq7, eq7_)]
+    eq1, eq1_ = sym.Eq(dydt, t/2 + t**2 + sym.exp(t)*sym.sin(t)), t/2 + t**2 + sym.exp(t)*sym.sin(t)
+    eq2, eq2_ = sym.Eq(dydt, 2*t**2 + 10), 2*t**2 + 10
+    eq3, eq3_ = sym.Eq(dydt, sym.sin(t**2)), sym.sin(t**2)
+    eq4, eq4_ = sym.Eq(dydt, sym.cos(t) + 10),  sym.cos(t) + 10
+    eq5, eq5_ = sym.Eq(dydt, 2*y), 2*sym.Symbol('y')
+    eqs = [(eq1, eq1_), (eq2, eq2_), (eq3, eq3_), (eq4, eq4_), (eq5, eq5_)]
     i = 1
     for eq in eqs:
         print(f"{i}. {eq[0].lhs} = {eq[0].rhs}")
@@ -54,7 +52,7 @@ def main():
     y_analytic = None
     elapsed = None
     tmax = 20 # A value greater than 0
-    h = 0.05
+    h = 0.005
     if(option == 1):
         # Numerical calculation
         t0 = 0
@@ -103,6 +101,7 @@ def main():
         eq_C1 = sym.Eq(y0, sym.dsolve(eq).rhs.subs(sym.Symbol('t'), t0))
         C1 = sym.solvers.solve(eq_C1, sym.Symbol('C1'))[0]
         y = sym.dsolve(eq).rhs.subs(sym.Symbol('C1'), C1)
+        print(y)
         y_analytic = eval_func(y, t)
     elif(option == 2):
         order = int(input("Please type the order of the ODE: "))
@@ -136,12 +135,13 @@ def main():
             eq = sym.Eq(dydt, sym.dsolve(eq).rhs.subs(sym.Symbol('C1'), C))
             if(i == order - 1):
                 y = eq.rhs
+        print(y)
         y_analytic = eval_func(y, t)
     elif(option == 3):
         order = 2
         # Numerical calculation
         t0, y0 = 0, 0
-        tn, yn = 1, 1
+        tn, yn = 20, 1
         n = 5
         print("1. Finite difference method")
         print("2. Finite element method")
@@ -170,6 +170,7 @@ def main():
             eq = sym.Eq(dydt, sym.dsolve(eq).rhs.subs(sym.Symbol('C1'), C))
             if(i == order - 1):
                 y = eq.rhs
+        print(y)
         y_analytic = eval_func(y, t)
     error = abs_error(y_approx, y_analytic)
     mean_error = np.mean(error)
@@ -187,7 +188,7 @@ def main():
     scalar_offset = 0 # 1.3
     x0_1, xmax_1 = plt.xlim()
     y0_1, ymax_1 = plt.ylim()
-    text_x_pos_1 = 1
+    text_x_pos_1 = 10.1
     text_y_pos_1 = y0_1 + (ymax_1 - y0_1) + scalar_offset
     ax1.text(text_x_pos_1, text_y_pos_1, "Mean error: {:e} \nStandard deviation: {:e} \nRunning time: {:e} sec".format(mean_error, error_std, elapsed), bbox=dict(boxstyle="round",
                 ec=(1., 0.5, 0.5),
