@@ -3,6 +3,16 @@ import numpy as np
 from utils import build_polynomial_matrix, evaluate_polynomial
 
 def eulers_method(f, t0, y0, h, n):
+    """
+        Input:
+            f: A function f that represents the right-hand-side of the ordinary differential equation
+            t0: Initial value of t
+            y0: Initial value of y
+            h: An increment value
+            n: Number of steps after the initial value t
+        Output:
+            Approximation of the solution of the IVP for the ordinary differential equation for the values t0, t0 + h, t0 + 2h, ... , t0 + nh using the Euler's method
+    """
     t = [None for _ in range(n + 1)]
     y = [None for _ in range(n + 1)]
     t[0] = t0
@@ -18,6 +28,16 @@ def eulers_method(f, t0, y0, h, n):
     return y
 
 def taylor_series_method(f, t0, y0, h, n):
+    """
+        Input:
+            f: A function f that represents the right-hand-side of the ordinary differential equation
+            t0: Initial value of t
+            y0: Initial value of y
+            h: An increment value
+            n: Number of steps after the initial value t
+        Output:
+            Approximation of the solution of the IVP for the ordinary differential equation for the values t0, t0 + h, t0 + 2h, ... , t0 + nh using the Taylor series method
+    """
     t = [None for _ in range(n + 1)]
     y = [None for _ in range(n + 1)]
     t[0] = t0
@@ -34,6 +54,16 @@ def taylor_series_method(f, t0, y0, h, n):
     return y
 
 def runge_kutta_2_method(f, t0, y0, h, n):
+    """
+        Input:
+            f: A function f that represents the right-hand-side of the ordinary differential equation
+            t0: Initial value of t
+            y0: Initial value of y
+            h: An increment value
+            n: Number of steps after the initial value t
+        Output:
+            Approximation of the solution of the IVP for the ordinary differential equation for the values t0, t0 + h, t0 + 2h, ... , t0 + nh using the method of Runge-Kutta of order 2
+    """
     t = [None for _ in range(n + 1)]
     y = [None for _ in range(n + 1)]
     t[0] = t0
@@ -51,6 +81,16 @@ def runge_kutta_2_method(f, t0, y0, h, n):
     return y
 
 def runge_kutta_4_method(f, t0, y0, h, n):
+    """
+        Input:
+            f: A function f that represents the right-hand-side of the ordinary differential equation
+            t0: Initial value of t
+            y0: Initial value of y
+            h: An increment value
+            n: Number of steps after the initial value t
+        Output:
+            Approximation of the solution of the IVP for the ordinary differential equation for the values t0, t0 + h, t0 + 2h, ... , t0 + nh using the method of Runge-Kutta of order 4
+    """
     t = [None for _ in range(n + 1)]
     y = [None for _ in range(n + 1)]
     t[0] = t0
@@ -70,6 +110,16 @@ def runge_kutta_4_method(f, t0, y0, h, n):
     return y
 
 def two_steps_method(f, t0, y0, h, n):
+    """
+        Input:
+            f: A function f that represents the right-hand-side of the ordinary differential equation
+            t0: Initial value of t
+            y0: Initial value of y
+            h: An increment value
+            n: Number of steps after the initial value t
+        Output:
+            Approximation of the solution of the IVP for the ordinary differential equation for the values t0, t0 + h, t0 + 2h, ... , t0 + nh using the two steps method
+    """
     t = [None for _ in range(n + 1)]
     y = [None for _ in range(n + 1)]
     ans = runge_kutta_4_method(f, t0, y0, h, 1)
@@ -88,6 +138,16 @@ def two_steps_method(f, t0, y0, h, n):
     return y
 
 def adams_bashforth(f, t0, y0, h, n):
+    """
+        Input:
+            f: A function f that represents the right-hand-side of the ordinary differential equation
+            t0: Initial value of t
+            y0: Initial value of y
+            h: An increment value
+            n: Number of steps after the initial value t
+        Output:
+            Approximation of the solution of the IVP for the ordinary differential equation for the values t0, t0 + h, t0 + 2h, ... , t0 + nh using the Adams-Bashforth method
+    """
     t = [None for _ in range(n + 1)]
     y = [None for _ in range(n + 1)]
     ans = runge_kutta_4_method(f, t0, y0, h, 3)
@@ -110,13 +170,23 @@ def adams_bashforth(f, t0, y0, h, n):
     return y
 
 def higher_order_method(f, initial_values, h, n, order):
+    """
+        Input:
+            f: A function f that represents the right-hand-side of the ordinary differential equation
+            initial_values: An array that contains the initial values of the different differential equations
+            h: An increment value
+            n: Number of steps after the initial value t
+            order: The order of the differential equation
+        Output:
+            Approximation of the solution of the IVP for the higher order ordinary differential equation for the values t0, t0 + h, t0 + 2h, ... , t0 + nh
+    """
     t = [None for _ in range(n + 1)]
     t[0] = initial_values[0][0]
     for i in range(1, n + 1):
         t[i] = t[i - 1] + h
     t0 = initial_values[0][0]
     y0 = initial_values[0][1]
-    y_prev = eulers_method(f, t0, y0, h, n)
+    y_prev = eulers_method(f, t0, y0, h, n) # Euler's method
     y_curr = [None for _ in range(n + 1)]
     for i in range(1, order):
         t0 = initial_values[i][0]
@@ -131,6 +201,17 @@ def higher_order_method(f, initial_values, h, n, order):
     return y_curr
 
 def finite_difference_method(f, t0, tn, y0, yn, n):
+    """
+        Input:
+            f: A function f that represents the right-hand-side of the ordinary differential equation
+            t0: Initial value of t
+            tn: Final value of t
+            y0: Initial value of y
+            yn: Final value of y
+            n: Number of points in the interval [t0, tn]
+        Output:
+            Approximation of the solution of the BVP for the 2-order ordinary differential equation for the values t0, t0 + (tn - t0)/(n - 1), t0 + 2(tn - t0)/(n - 1), ... , tn using the finite difference method
+    """
     h = (tn - t0)/(n - 1)
     t = list(np.linspace(t0, tn, num = n))
     y = [None for _ in range(n)]
@@ -161,6 +242,17 @@ def finite_difference_method(f, t0, tn, y0, yn, n):
     return y
 
 def finite_element_method(f, t0, tn, y0, yn, n):
+    """
+        Input:
+            f: A function f that represents the right-hand-side of the ordinary differential equation
+            t0: Initial value of t
+            tn: Final value of t
+            y0: Initial value of y
+            yn: Final value of y
+            n: Number of points in the interval [t0, tn]
+        Output:
+            Approximation of the solution of the BVP for the 2-order ordinary differential equation for the values t0, t0 + (tn - t0)/(n - 1), t0 + 2(tn - t0)/(n - 1), ... , tn using the finite element method
+    """
     t = list(np.linspace(t0, tn, num = n))
     A = np.array([[0 for _ in range(n)] for _ in range(n)], dtype = 'float')
     b = np.array([[0] for _ in range(n)], dtype = 'float')
