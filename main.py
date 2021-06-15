@@ -147,7 +147,7 @@ def main():
         # Numerical calculation
         t0, y0 = 0, 0
         tn, yn = 20, None
-        n = 5
+        n = 100
 
         # Analytical calculation
         t = list(np.linspace(t0, tn, num = n))
