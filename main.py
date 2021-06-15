@@ -20,7 +20,8 @@ def main():
     eq3, eq3_ = sym.Eq(dydt, sym.sin(t**2)), sym.sin(t**2)
     eq4, eq4_ = sym.Eq(dydt, sym.cos(t) + 10),  sym.cos(t) + 10
     eq5, eq5_ = sym.Eq(dydt, 2*y), 2*sym.Symbol('y')
-    eqs = [(eq1, eq1_), (eq2, eq2_), (eq3, eq3_), (eq4, eq4_), (eq5, eq5_)]
+    eq6, eq6_ = sym.Eq(dydt, 6*t), 6*t
+    eqs = [(eq1, eq1_), (eq2, eq2_), (eq3, eq3_), (eq4, eq4_), (eq5, eq5_), (eq6, eq6_)]
     i = 1
     for eq in eqs:
         print(f"{i}. {eq[0].lhs} = {eq[0].rhs}")
@@ -48,11 +49,13 @@ def main():
         else:
             good = True
     t = None
+    t_analytic = None
     y_approx = None
     y_analytic = None
+    y_analytic_error = None
     elapsed = None
     tmax = 20 # A value greater than 0
-    h = 0.005
+    h = 0.5
     if(option == 1):
         # Numerical calculation
         t0 = 0
@@ -101,16 +104,17 @@ def main():
         eq_C1 = sym.Eq(y0, sym.dsolve(eq).rhs.subs(sym.Symbol('t'), t0))
         C1 = sym.solvers.solve(eq_C1, sym.Symbol('C1'))[0]
         y = sym.dsolve(eq).rhs.subs(sym.Symbol('C1'), C1)
-        print(y)
-        y_analytic = eval_func(y, t)
+        t_analytic = list(np.linspace(t0, tmax, num = 1000))
+        y_analytic = eval_func(y, t_analytic)
+        y_analytic_error = eval_func(y, t)
     elif(option == 2):
         order = int(input("Please type the order of the ODE: "))
 
         # Numerical calculation
-        initial_values = [None for _ in range(order)]
-        for i in range(order):
-            initial_values[i] = (0, random.randint(1, 6)) # The t value must be the same for all the equations
-        print("Initial values:", initial_values)
+        initial_values = [(0, 6), (0, 2), (0, 2), (0, 1)]
+        # for i in range(order):
+        #     initial_values[i] = (0, random.randint(1, 6)) # The t value must be the same for all the equations
+        # print("Initial values:", initial_values)
         n = int(math.ceil(tmax/h)) # Number of steps after the initial value
         start = time.time()
         y_approx = higher_order_method(eq_, initial_values, h, n, order)
@@ -135,14 +139,30 @@ def main():
             eq = sym.Eq(dydt, sym.dsolve(eq).rhs.subs(sym.Symbol('C1'), C))
             if(i == order - 1):
                 y = eq.rhs
-        print(y)
-        y_analytic = eval_func(y, t)
+        t_analytic = list(np.linspace(initial_values[0][0], tmax, num = 1000))
+        y_analytic = eval_func(y, t_analytic)
+        y_analytic_error = eval_func(y, t)
     elif(option == 3):
         order = 2
         # Numerical calculation
         t0, y0 = 0, 0
-        tn, yn = 20, 1
+        tn, yn = 20, None
         n = 5
+
+        # Analytical calculation
+        t = list(np.linspace(t0, tn, num = n))
+        y = None
+        for i in range(order):
+            eq_C = sym.Eq(y0, sym.dsolve(eq).rhs.subs(sym.Symbol('t'), t0))
+            C = sym.solvers.solve(eq_C, sym.Symbol('C1'))[0]
+            eq = sym.Eq(dydt, sym.dsolve(eq).rhs.subs(sym.Symbol('C1'), C))
+            if(i == order - 1):
+                y = eq.rhs
+        t_analytic = list(np.linspace(t0, tn, num = 1000))
+        y_analytic = eval_func(y, t_analytic)
+        y_analytic_error = eval_func(y, t)
+        yn = y_analytic[-1]
+
         print("1. Finite difference method")
         print("2. Finite element method")
         good = False
@@ -161,18 +181,7 @@ def main():
             y_approx = finite_element_method(eq_, t0, tn, y0, yn, n)
         end = time.time()
         elapsed = end - start
-        # Analytical calculation
-        t = list(np.linspace(t0, tn, num = n))
-        y = None
-        for i in range(order):
-            eq_C = sym.Eq(y0, sym.dsolve(eq).rhs.subs(sym.Symbol('t'), t0))
-            C = sym.solvers.solve(eq_C, sym.Symbol('C1'))[0]
-            eq = sym.Eq(dydt, sym.dsolve(eq).rhs.subs(sym.Symbol('C1'), C))
-            if(i == order - 1):
-                y = eq.rhs
-        print(y)
-        y_analytic = eval_func(y, t)
-    error = abs_error(y_approx, y_analytic)
+    error = abs_error(y_approx, y_analytic_error)
     mean_error = np.mean(error)
     error_std = np.std(error)
     print(f"Mean error: {mean_error}")
@@ -181,7 +190,7 @@ def main():
     # Plotting
     fig1, ax1 = plt.subplots()
     ax1.plot(t, y_approx, label="Approximate solution")
-    ax1.plot(t, y_analytic, label="Analytic solution")
+    ax1.plot(t_analytic, y_analytic, label="Analytic solution")
     ax1.legend()
     ax1.set_xlabel("t")
     ax1.set_ylabel("y(t)")

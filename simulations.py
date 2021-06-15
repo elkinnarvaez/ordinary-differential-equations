@@ -76,15 +76,15 @@ def main():
         running_time_runge_kutta_4_method = list()
         running_time_two_steps_method = list()
         running_time_adams_bashforth = list()
-        # Numerical calculation
         t0 = 0
         y0 = 1
-        h_values = list(np.linspace(0.05, 2, num = 10))
+        h_values = list(np.linspace(0.01, 1, num = 10))
         for h in h_values:
             print(h)
             x_axis.append(h)
             n = int(math.ceil(tmax/h)) # Number of steps after the initial value
-            y_approx = None
+
+            # Numerical calculation
             start = time.time()
             y_approx_eulers_method = eulers_method(eq_, t0, y0, h, n)
             end = time.time()
@@ -203,65 +203,23 @@ def main():
         plt.show()
 
     elif(option == 2):
-        order = int(input("Please type the order of the ODE: "))
-
-        # Numerical calculation
-        initial_values = [None for _ in range(order)]
-        for i in range(order):
-            initial_values[i] = (0, random.randint(1, 6)) # The t value must be the same for all the equations
-        print("Initial values:", initial_values)
-        n = int(math.ceil(tmax/h)) # Number of steps after the initial value
-        start = time.time()
-        y_approx = higher_order_method(eq_, initial_values, h, n, order)
-        end = time.time()
-        elapsed = end - start
-
-        # Analytical calculation
-        t = [None for _ in range(n + 1)]
-        t[0] = initial_values[0][0]
-        tk = initial_values[0][0] + h
-        k = 1
-        while(k <= n):
-            t[k] = tk
-            tk += h
-            k += 1
-        y = None
-        for i in range(order):
-            t0 = initial_values[i][0]
-            y0 = initial_values[i][1]
-            eq_C = sym.Eq(y0, sym.dsolve(eq).rhs.subs(sym.Symbol('t'), t0))
-            C = sym.solvers.solve(eq_C, sym.Symbol('C1'))[0]
-            eq = sym.Eq(dydt, sym.dsolve(eq).rhs.subs(sym.Symbol('C1'), C))
-            if(i == order - 1):
-                y = eq.rhs
-        print(y)
-        y_analytic = eval_func(y, t)
+        pass
     elif(option == 3):
+        x_axis = list()
+
+        y_axis_mean_error_finite_difference_method = list()
+        y_axis_mean_error_finite_element_method = list()
+
+        y_axis_error_std_finite_difference_method = list()
+        y_axis_error_std_finite_element_method = list()
+
+        running_time_finite_difference_method = list()
+        running_time_finite_element_method = list()
+
         order = 2
-        # Numerical calculation
         t0, y0 = 0, 0
-        tn, yn = 20, 1
-        n = 5
-        print("1. Finite difference method")
-        print("2. Finite element method")
-        good = False
-        option = None
-        while(not good):
-            option = int(input("Please choose the method you want to work with: "))
-            if(option < 1 or option > 2):
-                print("Invalid option. Please try again")
-            else:
-                good = True
-        y_approx = None
-        start = time.time()
-        if(option == 1):
-            y_approx = finite_difference_method(eq_, t0, tn, y0, yn, n)
-        elif(option == 2):
-            y_approx = finite_element_method(eq_, t0, tn, y0, yn, n)
-        end = time.time()
-        elapsed = end - start
-        # Analytical calculation
-        t = list(np.linspace(t0, tn, num = n))
+        tn, yn = 20, None
+
         y = None
         for i in range(order):
             eq_C = sym.Eq(y0, sym.dsolve(eq).rhs.subs(sym.Symbol('t'), t0))
@@ -269,8 +227,64 @@ def main():
             eq = sym.Eq(dydt, sym.dsolve(eq).rhs.subs(sym.Symbol('C1'), C))
             if(i == order - 1):
                 y = eq.rhs
-        print(y)
-        y_analytic = eval_func(y, t)
+        for n in range(5, 100, 5):
+            print(n)
+            x_axis.append(n)
+
+            # Analytical calculation
+            t = list(np.linspace(t0, tn, num = n))
+            y_analytic = eval_func(y, t)
+            yn = y_analytic[-1]
+
+            # Numerical calculation
+            start = time.time()
+            y_approx_finite_difference_method = finite_difference_method(eq_, t0, tn, y0, yn, n)
+            end = time.time()
+            elapsed_finite_difference_method = end - start
+            start = time.time()
+            y_approx_finite_element_method = finite_element_method(eq_, t0, tn, y0, yn, n)
+            end = time.time()
+            elapsed_finite_element_method = end - start
+
+            error = abs_error(y_approx_finite_difference_method, y_analytic)
+            mean_error = np.mean(error)
+            error_std = np.std(error)
+            y_axis_mean_error_finite_difference_method.append(mean_error)
+            y_axis_error_std_finite_difference_method.append(error_std)
+            running_time_finite_difference_method.append(elapsed_finite_difference_method)
+
+            error = abs_error(y_approx_finite_element_method, y_analytic)
+            mean_error = np.mean(error)
+            error_std = np.std(error)
+            y_axis_mean_error_finite_element_method.append(mean_error)
+            y_axis_error_std_finite_element_method.append(error_std)
+            running_time_finite_element_method.append(elapsed_finite_element_method)
+
+        # Plotting
+        print(y_axis_mean_error_finite_difference_method)
+        print(y_axis_mean_error_finite_element_method)
+        fig1, ax1 = plt.subplots()
+        ax1.plot(x_axis, y_axis_mean_error_finite_difference_method, label="Finite difference method")
+        ax1.plot(x_axis, y_axis_mean_error_finite_element_method, label="Finite element method")
+        ax1.legend()
+        ax1.set_xlabel("n")
+        ax1.set_ylabel("Mean error")
+
+        fig2, ax2 = plt.subplots()
+        ax2.plot(x_axis, y_axis_error_std_finite_difference_method, label="Finite difference method")
+        ax2.plot(x_axis, y_axis_error_std_finite_element_method, label="Finite element method")
+        ax2.legend()
+        ax2.set_xlabel("n")
+        ax2.set_ylabel("Standard deviation")
+    
+        fig3, ax3 = plt.subplots()
+        ax3.plot(x_axis, running_time_finite_difference_method, label="Finite difference method")
+        ax3.plot(x_axis, running_time_finite_element_method, label="Finite element method")
+        ax3.legend()
+        ax3.set_xlabel("n")
+        ax3.set_ylabel("Time (seconds)")
+
+        plt.show()
     return 0
 
 if __name__ == '__main__':
