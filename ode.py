@@ -2,6 +2,7 @@ import sympy as sym
 import numpy as np
 from utils import build_polynomial_matrix, evaluate_polynomial
 
+
 def eulers_method(f, t0, y0, h, n):
     """
         Input:
